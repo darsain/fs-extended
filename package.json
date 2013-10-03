@@ -1,0 +1,41 @@
+{
+	"name": "fs-extended",
+	"description": "Extends native fs module with a lot of convenient methods.",
+	"version": "0.1.0",
+	"homepage": "https://github.com/Darsain/fs-extended",
+	"author": {
+		"name": "Darsain",
+		"url": "http://darsa.in"
+	},
+	"keywords": [
+		"fs",
+		"extended",
+		"convenient",
+		"recursive"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/Darsain/fs-extended.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Darsain/fs-extended/issues"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://opensource.org/licenses/MIT"
+		}
+	],
+	"main": "index",
+	"engines": {
+		"node": "*"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"should": "*",
+		"mocha": "*"
+	},
+	"scripts": {
+		"test": "mocha"
+	}
+}

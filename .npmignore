@@ -1,0 +1,9 @@
+test
+
+.editorconfig
+.gitignore
+.jshintrc
+.npmignore
+.travis.yml
+
+CONTRIBUTING.md
