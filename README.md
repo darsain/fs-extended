@@ -396,6 +396,12 @@ dir
 These are the outputs:
 
 ```js
+fs.uniquePath('dir/unique', function (uniquePath) {
+	uniquePath; // => dir/unique
+});
+```
+
+```js
 fs.uniquePath('dir/foo', function (uniquePath) {
 	uniquePath; // => dir/foo-2
 });
@@ -410,12 +416,6 @@ fs.uniquePath('dir/bar.txt', function (uniquePath) {
 ```js
 fs.uniquePath('dir/baz.tar.gz', function (uniquePath) {
 	uniquePath; // => dir/baz-2.tar.gz
-});
-```
-
-```js
-fs.uniquePath('dir/unique', function (uniquePath) {
-	uniquePath; // => dir/unique
 });
 ```
 
