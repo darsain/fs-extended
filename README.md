@@ -1,7 +1,4 @@
-# fs-extended
-
-[![Build Status](https://secure.travis-ci.org/Darsain/fs-extended.png?branch=master)](http://travis-ci.org/Darsain/fs-extended)
-[![NPM version](https://badge.fury.io/js/fs-extended.png)](https://npmjs.org/package/fs-extended)
+# fs-extended [![Build Status](https://secure.travis-ci.org/Darsain/fs-extended.png?branch=master)](http://travis-ci.org/Darsain/fs-extended) [![NPM version](https://badge.fury.io/js/fs-extended.png)](https://npmjs.org/package/fs-extended)
 
 Node.js module that extends the native `fs` with a lot of convenient methods.
 
@@ -41,8 +38,11 @@ All methods from native [`fs`](http://nodejs.org/api/fs.html) module are availab
 Creates a new, or overrides an existing file. Creates any missing parent directories.
 
 - **path** `String` Path to a file.
-- **data** `String` Contents of a new file.
-- **[mode]** `Object` File mode. Defaults to `0666`.
+- **data** `String|Buffer` Contents of a new file.
+- **[options]** `Object` Object with options (will be passed to `fs.writeFile`):
+	- *encoding* `String|Null` File encoding. Defaults to `utf8`.
+	- *mode* `Number` File mode. Defaults to `0666`.
+	- *flag* `String` File open flag. Defaults to `w`.
 - **[callback]** `Function` Receives arguments:
 	- *err* `Mixed` Error object on error, `null` otherwise.
 
@@ -108,7 +108,7 @@ Synchronous `fs.emptyFile()`;
 
 ### fs.deleteFile(file, [callback]);
 
-Deletes a file. Doesn't throw an error When file doesn't exist.
+Deletes a file. Doesn't throw an error when file doesn't exist.
 
 A mere alias of `fs.unlink(file, callback)` with ignored `ENOENT` error and an optional callback for API consistency.
 
