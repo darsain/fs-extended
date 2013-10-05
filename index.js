@@ -69,24 +69,23 @@ function extend() {
  *
  * @param  {String}   file
  * @param  {String}   data
- * @param  {Mixed}    [mode]
+ * @param  {Mixed}    [options]
  * @param  {Function} [callback]
  *
  * @return {Void}
  */
-fs.createFile = function (file, data, mode, callback) {
-	if (typeof mode === 'function') {
-		callback = mode;
-		mode = undefined;
+fs.createFile = function (file, data, options, callback) {
+	if (typeof options === 'function') {
+		callback = options;
+		options = undefined;
 	}
 	file = path.resolve(file);
-	mode = normode(mode);
 	callback = norback(callback);
 
 	createFile(fileCreated);
 
 	function createFile(callback) {
-		fs.writeFile(file, data, { flag: 'w', mode: mode }, callback);
+		fs.writeFile(file, data, options, callback);
 	}
 
 	function fileCreated(err) {
@@ -114,13 +113,12 @@ fs.createFile = function (file, data, mode, callback) {
  *
  * @param  {String} file
  * @param  {String} data
- * @param  {String} [mode]
+ * @param  {String} [options]
  *
  * @return {Void}
  */
-fs.createFileSync = function (file, data, mode) {
+fs.createFileSync = function (file, data, options) {
 	file = path.resolve(file);
-	mode = normode(mode);
 
 	try {
 		createFile();
@@ -133,7 +131,7 @@ fs.createFileSync = function (file, data, mode) {
 	}
 
 	function createFile() {
-		fs.writeFileSync(file, data, { flag: 'w', mode: mode });
+		fs.writeFileSync(file, data, options);
 	}
 };
 
