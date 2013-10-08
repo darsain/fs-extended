@@ -28,8 +28,9 @@
 	],
 	"main": "index",
 	"engines": {
-		"node": "*"
+		"node": ">=0.10.0"
 	},
+	"engineStrict": true,
 	"dependencies": {},
 	"devDependencies": {
 		"should": "*",
