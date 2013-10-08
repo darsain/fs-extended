@@ -1,14 +1,15 @@
 'use strict';
 
-var fs = require('../index');
+process.umask(0);
 
-var tmp = 'tmp';
+var fs = require('../index');
+var h = require('./lib/helpers');
 
 before(function () {
-	fs.createDirSync(tmp);
-	fs.emptyDirSync(tmp);
+	fs.createDirSync(h.tmp);
+	fs.emptyDirSync(h.tmp);
 });
 
 after(function () {
-	fs.deleteDirSync(tmp);
+	fs.deleteDirSync(h.tmp);
 });

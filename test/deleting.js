@@ -5,12 +5,10 @@ var path = require('path');
 var should = require('should');
 var h = require('./lib/helpers');
 
-var tmp = 'tmp';
-
 describe('Deleting files:', function () {
 
 	function createDummy() {
-		var filePath = path.join(tmp, h.rndstr());
+		var filePath = path.join(h.tmp, h.rndstr());
 		var data = h.rndstr();
 		fs.createFileSync(filePath, data);
 		return filePath;
@@ -96,7 +94,7 @@ describe('Deleting directories:', function () {
 	];
 
 	function createDummy() {
-		var dirPath = path.join(tmp, h.rndstr());
+		var dirPath = path.join(h.tmp, h.rndstr());
 		dirs.forEach(function (dir) {
 			fs.createDirSync(path.join(dirPath, dir));
 		});
@@ -118,7 +116,7 @@ describe('Deleting directories:', function () {
 		});
 
 		it('should not throw an error when directory doesn\'t exist', function (done) {
-			var dirPath = path.join(tmp, h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr());
 			fs.existsSync(dirPath).should.be.false;
 			fs.deleteDir(dirPath, function (err) {
 				should.not.exist(err);
@@ -137,7 +135,7 @@ describe('Deleting directories:', function () {
 		});
 
 		it('should not throw an error when directory doesn\'t exist', function () {
-			var dirPath = path.join(tmp, h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr());
 			fs.existsSync(dirPath).should.be.false;
 			fs.deleteDirSync(dirPath);
 		});

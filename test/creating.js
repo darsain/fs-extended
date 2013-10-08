@@ -7,61 +7,56 @@ var h = require('./lib/helpers');
 
 var isWin = !!process.platform.match(/^win/);
 var notWin = !isWin;
-var tmp = 'tmp';
 
 describe('Creating files:', function () {
 	var data = h.rndstr();
-	var mode = parseInt('0776', 8);
+	var mode = '776';
 
 	afterEach(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.createFile()', function () {
 
 		it('should create a file with a specified data and mode', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
-			fs.createFile(filePath, data, mode, function (err) {
+			var filePath = path.join(h.tmp, h.rndstr());
+			fs.createFile(filePath, data, { mode: mode }, function (err) {
 				should.not.exist(err);
 				String(fs.readFileSync(filePath)).should.equal(data);
 				if (notWin) {
-					fs.statSync(filePath).mode.should.equal(mode);
+					h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 				}
 				done();
 			});
 		});
 
 		it('should default to 0666 when mode is omitted', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
-			var mode = parseInt('0666', 8);
+			var filePath = path.join(h.tmp, h.rndstr());
+			var mode = '666';
 			fs.createFile(filePath, data, function (err) {
 				should.not.exist(err);
 				String(fs.readFileSync(filePath)).should.equal(data);
 				if (notWin) {
-					fs.statSync(filePath).mode.should.equal(mode);
+					h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 				}
 				done();
 			});
 		});
 
-		it('should override file with new content and mode', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
-			fs.createFileSync(filePath, data, mode);
+		it('should override file with new content', function (done) {
+			var filePath = path.join(h.tmp, h.rndstr());
+			fs.createFileSync(filePath, data);
 
 			var newData = h.rndstr();
-			var newMode = parseInt('0767', 8);
-			fs.createFile(filePath, newData, newMode, function (err) {
+			fs.createFile(filePath, newData, function (err) {
 				should.not.exist(err);
 				String(fs.readFileSync(filePath)).should.equal(newData);
-				if (notWin) {
-					fs.statSync(filePath).mode.should.equal(newMode);
-				}
 				done();
 			});
 		});
 
 		it('should create missing parent directories', function (done) {
-			var filePath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.createFile(filePath, '', function (err) {
 				should.not.exist(err);
 				fs.existsSync(filePath).should.be.ok;
@@ -73,44 +68,40 @@ describe('Creating files:', function () {
 	describe('.createFileSync()', function () {
 
 		it('should create a file with a specified data and mode', function () {
-			var filePath = path.join(tmp, h.rndstr());
-			fs.createFileSync(filePath, data, mode);
+			var filePath = path.join(h.tmp, h.rndstr());
+			fs.createFileSync(filePath, data, { mode: mode });
 			String(fs.readFileSync(filePath)).should.equal(data);
 			if (notWin) {
-				fs.statSync(filePath).mode.should.equal(mode);
+				h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 			}
 		});
 
 		it('should default to 0666 when mode is omitted', function () {
-			var filePath = path.join(tmp, h.rndstr());
-			var mode = parseInt('0666', 8);
+			var filePath = path.join(h.tmp, h.rndstr());
+			var mode = '666';
 			fs.createFileSync(filePath, data);
 			String(fs.readFileSync(filePath)).should.equal(data);
 			if (notWin) {
-				fs.statSync(filePath).mode.should.equal(mode);
+				h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 			}
 		});
 
-		it('should override file with new content and mode', function () {
-			var filePath = path.join(tmp, h.rndstr());
+		it('should override file with new content', function () {
+			var filePath = path.join(h.tmp, h.rndstr());
 
-			fs.createFileSync(filePath, data, mode);
+			fs.createFileSync(filePath, data, { mode: mode });
 			String(fs.readFileSync(filePath)).should.equal(data);
 			if (notWin) {
-				fs.statSync(filePath).mode.should.equal(mode);
+				h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 			}
 
 			var newData = h.rndstr();
-			var newMode = parseInt('0767', 8);
-			fs.createFileSync(filePath, newData, newMode);
+			fs.createFileSync(filePath, newData);
 			String(fs.readFileSync(filePath)).should.equal(newData);
-			if (notWin) {
-				fs.statSync(filePath).mode.should.equal(newMode);
-			}
 		});
 
 		it('should create missing parent directories', function () {
-			var filePath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.createFileSync(filePath, '');
 			fs.existsSync(filePath).should.be.ok;
 		});
@@ -119,43 +110,43 @@ describe('Creating files:', function () {
 	describe('.ensureFile()', function () {
 
 		it('should create missing file in existing directory', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.ensureFile(filePath, mode, function (err) {
 				should.not.exist(err);
 				fs.existsSync(filePath).should.be.ok;
 				if (notWin) {
-					fs.statSync(filePath).mode.should.equal(mode);
+					h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 				}
 				done();
 			});
 		});
 
 		it('should create missing file in missing directory', function (done) {
-			var filePath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.ensureFile(filePath, mode, function (err) {
 				should.not.exist(err);
 				fs.existsSync(filePath).should.be.ok;
 				if (notWin) {
-					fs.statSync(filePath).mode.should.equal(mode);
+					h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 				}
 				done();
 			});
 		});
 
 		it('should default to 0666 for new files when mode is omitted', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
-			var mode = parseInt('0666', 8);
+			var filePath = path.join(h.tmp, h.rndstr());
+			var mode = '666';
 			fs.ensureFile(filePath, function (err) {
 				should.not.exist(err);
 				if (notWin) {
-					fs.statSync(filePath).mode.should.equal(mode);
+					h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 				}
 				done();
 			});
 		});
 
 		it('should not override existing file', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.createFileSync(filePath, data);
 			fs.ensureFile(filePath, function (err) {
 				should.not.exist(err);
@@ -165,15 +156,15 @@ describe('Creating files:', function () {
 		});
 
 		it('should change file mode, but not override existing file', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
-			fs.createFileSync(filePath, data, mode);
+			var filePath = path.join(h.tmp, h.rndstr());
+			fs.createFileSync(filePath, data, { mode: mode });
 
-			var newMode = parseInt('0767', 8);
+			var newMode = '767';
 			fs.ensureFile(filePath, newMode, function (err) {
 				should.not.exist(err);
 				String(fs.readFileSync(filePath)).should.equal(data);
 				if (notWin) {
-					fs.statSync(filePath).mode.should.equal(newMode);
+					h.modestr(fs.statSync(filePath).mode).should.equal(newMode);
 				}
 				done();
 			});
@@ -183,48 +174,48 @@ describe('Creating files:', function () {
 	describe('.ensureFileSync()', function () {
 
 		it('should create missing file in existing directory', function () {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.ensureFileSync(filePath, mode);
 			fs.existsSync(filePath).should.be.ok;
 			if (notWin) {
-				fs.statSync(filePath).mode.should.equal(mode);
+				h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 			}
 		});
 
 		it('should create missing file in missing directory', function () {
-			var filePath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.ensureFileSync(filePath, mode);
 			fs.existsSync(filePath).should.be.ok;
 			if (notWin) {
-				fs.statSync(filePath).mode.should.equal(mode);
+				h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 			}
 		});
 
 		it('should default to 0666 for new files when mode is omitted', function () {
-			var filePath = path.join(tmp, h.rndstr());
-			var mode = parseInt('0666', 8);
+			var filePath = path.join(h.tmp, h.rndstr());
+			var mode = '666';
 			fs.ensureFileSync(filePath);
 			if (notWin) {
-				fs.statSync(filePath).mode.should.equal(mode);
+				h.modestr(fs.statSync(filePath).mode).should.equal(mode);
 			}
 		});
 
 		it('should not override existing file', function () {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.createFileSync(filePath, data);
-			fs.ensureFile(filePath);
+			fs.ensureFileSync(filePath);
 			String(fs.readFileSync(filePath)).should.equal(data);
 		});
 
 		it('should change file mode, but not override existing file', function () {
-			var filePath = path.join(tmp, h.rndstr());
-			fs.createFileSync(filePath, data, mode);
+			var filePath = path.join(h.tmp, h.rndstr());
+			fs.createFileSync(filePath, data, { mode: mode });
 
-			var newMode = parseInt('0776', 8);
+			var newMode = '776';
 			fs.ensureFileSync(filePath, newMode);
 			String(fs.readFileSync(filePath)).should.equal(data);
 			if (notWin) {
-				fs.statSync(filePath).mode.should.equal(newMode);
+				h.modestr(fs.statSync(filePath).mode).should.equal(newMode);
 			}
 		});
 	});
@@ -232,65 +223,65 @@ describe('Creating files:', function () {
 });
 
 describe('Creating directories:', function () {
-	var mode = parseInt('0776', 8);
+	var mode = '776';
 
 	afterEach(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.createDir()', function () {
 
 		it('should create a directory with a specified mode', function (done) {
-			var dirPath = path.join(tmp, h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr());
 			fs.createDir(dirPath, mode, function (err) {
 				should.not.exist(err);
 				var stat = fs.statSync(dirPath);
 				stat.isDirectory().should.be.ok;
 				if (notWin) {
-					stat.mode.should.equal(mode);
+					h.modestr(stat.mode).should.equal(mode);
 				}
 				done();
 			});
 		});
 
 		it('should create missing parent directories', function (done) {
-			var dirPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.createDir(dirPath, mode, function (err) {
 				should.not.exist(err);
 				var stat = fs.statSync(dirPath);
 				stat.isDirectory().should.be.ok;
 				if (notWin) {
-					stat.mode.should.equal(mode);
+					h.modestr(stat.mode).should.equal(mode);
 				}
 				done();
 			});
 		});
 
 		it('should default to 0777 when mode is omitted', function (done) {
-			var dirPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
-			var mode = parseInt('0777', 8);
+			var dirPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var mode = '777';
 			fs.createDir(dirPath, function (err) {
 				should.not.exist(err);
 				var stat = fs.statSync(dirPath);
 				stat.isDirectory().should.be.ok;
 				if (notWin) {
-					stat.mode.should.equal(mode);
+					h.modestr(stat.mode).should.equal(mode);
 				}
 				done();
 			});
 		});
 
 		it('should change mode when directory already exists but with a different mode than requested', function (done) {
-			var dirPath = path.join(tmp, h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr());
 			fs.createDirSync(dirPath, mode);
 
-			var newMode = parseInt('0767', 8);
+			var newMode = '767';
 			fs.createDir(dirPath, newMode, function (err) {
 				should.not.exist(err);
 				var stat = fs.statSync(dirPath);
 				stat.isDirectory().should.be.ok;
 				if (notWin) {
-					stat.mode.should.equal(newMode);
+					h.modestr(stat.mode).should.equal(newMode);
 				}
 				done();
 			});
@@ -301,46 +292,46 @@ describe('Creating directories:', function () {
 	describe('.createDirSync()', function () {
 
 		it('should create a directory with a specified mode', function () {
-			var dirPath = path.join(tmp, h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr());
 			fs.createDirSync(dirPath, mode);
 			var stat = fs.statSync(dirPath);
 			stat.isDirectory().should.be.ok;
 			if (notWin) {
-				stat.mode.should.equal(mode);
+				h.modestr(stat.mode).should.equal(mode);
 			}
 		});
 
 		it('should create missing parent directories', function () {
-			var dirPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.createDirSync(dirPath, mode);
 			var stat = fs.statSync(dirPath);
 			stat.isDirectory().should.be.ok;
 			if (notWin) {
-				stat.mode.should.equal(mode);
+				h.modestr(stat.mode).should.equal(mode);
 			}
 		});
 
 		it('should default to 0777 when mode is omitted', function () {
-			var dirPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
-			var mode = parseInt('0777', 8);
+			var dirPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var mode = '777';
 			fs.createDirSync(dirPath);
 			var stat = fs.statSync(dirPath);
 			stat.isDirectory().should.be.ok;
 			if (notWin) {
-				stat.mode.should.equal(mode);
+				h.modestr(stat.mode).should.equal(mode);
 			}
 		});
 
 		it('should change mode when directory already exists but with a different mode than requested', function () {
-			var dirPath = path.join(tmp, h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr());
 			fs.createDirSync(dirPath, mode);
 
-			var newMode = parseInt('0767', 8);
+			var newMode = '767';
 			fs.createDirSync(dirPath, newMode);
 			var stat = fs.statSync(dirPath);
 			stat.isDirectory().should.be.ok;
 			if (notWin) {
-				stat.mode.should.equal(newMode);
+				h.modestr(stat.mode).should.equal(newMode);
 			}
 		});
 

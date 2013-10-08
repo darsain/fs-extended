@@ -7,15 +7,14 @@ var h = require('./lib/helpers');
 
 var isWin = !!process.platform.match(/^win/);
 var notWin = !isWin;
-var tmp = 'tmp';
 
 describe('Copying files:', function () {
 
 	function createDummy() {
-		var filePath = path.join(tmp, h.rndstr());
+		var filePath = path.join(h.tmp, h.rndstr());
 		var data = h.rndstr();
-		var mode = parseInt('0776', 8);
-		fs.createFileSync(filePath, data, mode);
+		var mode = '776';
+		fs.createFileSync(filePath, data, { mode: mode });
 		return {
 			path: filePath,
 			data: data,
@@ -24,14 +23,14 @@ describe('Copying files:', function () {
 	}
 
 	afterEach(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.copyFile()', function () {
 
 		it('should copy file to a new location, preserving its content and mode', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.copyFile(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 				String(fs.readFileSync(dummy.path)).should.equal(String(fs.readFileSync(newPath)));
@@ -44,7 +43,7 @@ describe('Copying files:', function () {
 
 		it('should create missing parent directories', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.copyFile(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 				String(fs.readFileSync(dummy.path)).should.equal(String(fs.readFileSync(newPath)));
@@ -63,7 +62,7 @@ describe('Copying files:', function () {
 
 		it('should copy file to a new location, preserving its content and mode', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.copyFileSync(dummy.path, newPath);
 			String(fs.readFileSync(dummy.path)).should.equal(String(fs.readFileSync(newPath)));
 			if (notWin) {
@@ -73,7 +72,7 @@ describe('Copying files:', function () {
 
 		it('should create missing parent directories', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.copyFileSync(dummy.path, newPath);
 			String(fs.readFileSync(dummy.path)).should.equal(String(fs.readFileSync(newPath)));
 			if (notWin) {
@@ -89,7 +88,7 @@ describe('Copying files:', function () {
 
 		it('should copy a file when path to a file is passed', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.copy(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 				String(fs.readFileSync(dummy.path)).should.equal(String(fs.readFileSync(newPath)));
@@ -106,7 +105,7 @@ describe('Copying files:', function () {
 
 		it('should copy a file when path to a file is passed', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.copySync(dummy.path, newPath);
 			String(fs.readFileSync(dummy.path)).should.equal(String(fs.readFileSync(newPath)));
 			if (notWin) {
@@ -127,40 +126,39 @@ describe('Copying directories:', function () {
 		path.join('baz', 'bar', 'foo'),
 	];
 	var files = [
-		path.join('bar', h.rndstr()),
-		path.join('bar', h.rndstr()),
-		path.join('baz', 'bar', h.rndstr()),
-		h.rndstr(),
-		h.rndstr(),
+		path.join('bar', '1'),
+		path.join('bar', '2'),
+		path.join('baz', 'bar', '3'),
+		'4',
+		'5',
 	];
 	var modes = [
-		parseInt('0777', 8),
-		parseInt('0776', 8),
-		parseInt('0767', 8),
-		parseInt('0677', 8),
-		parseInt('0666', 8),
+		'777',
+		'776',
+		'767',
+		'766',
 	];
 
 	function createDummy() {
-		var dirPath = path.join(tmp, h.rndstr());
+		var dirPath = path.join(h.tmp, h.rndstr());
 		dirs.forEach(function (dir) {
-			fs.createDirSync(path.join(dirPath, dir), modes[Math.floor(Math.random()*modes.length)]);
+			fs.createDirSync(path.join(dirPath, dir));
 		});
 		files.forEach(function (file) {
-			fs.createFileSync(path.join(dirPath, file), h.rndstr(), modes[Math.floor(Math.random()*modes.length)]);
+			fs.createFileSync(path.join(dirPath, file), h.rndstr(), { mode: modes[Math.floor(Math.random()*modes.length)] });
 		});
 		return dirPath;
 	}
 
 	afterEach(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.copyDir()', function () {
 
 		it('should copy directory and everything in it from one location to another', function (done) {
 			var dirPath = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.copyDir(dirPath, newPath, function (err) {
 				should.not.exist(err);
 
@@ -197,7 +195,7 @@ describe('Copying directories:', function () {
 
 		it('should create missing parent directories', function (done) {
 			var dirPath = createDummy();
-			var newPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.copyDir(dirPath, newPath, function (err) {
 				should.not.exist(err);
 
@@ -240,7 +238,7 @@ describe('Copying directories:', function () {
 
 		it('should copy directory and everything in it from one location to another', function () {
 			var dirPath = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.copyDirSync(dirPath, newPath);
 
 			// Check directories
@@ -273,7 +271,7 @@ describe('Copying directories:', function () {
 
 		it('should create missing parent directories', function () {
 			var dirPath = createDummy();
-			var newPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.copyDirSync(dirPath, newPath);
 
 			// Check directories
@@ -312,7 +310,7 @@ describe('Copying directories:', function () {
 
 		it('should copy a directory when path to a directory is passed', function (done) {
 			var dirPath = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.copy(dirPath, newPath, function (err) {
 				should.not.exist(err);
 
@@ -353,7 +351,7 @@ describe('Copying directories:', function () {
 
 		it('should copy a directory when path to a directory is passed', function () {
 			var dirPath = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.copyDirSync(dirPath, newPath);
 
 			// Check directories

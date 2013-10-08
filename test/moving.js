@@ -7,15 +7,14 @@ var h = require('./lib/helpers');
 
 var isWin = !!process.platform.match(/^win/);
 var notWin = !isWin;
-var tmp = 'tmp';
 
 describe('Moving files', function () {
 
 	function createDummy() {
-		var filePath = path.join(tmp, h.rndstr());
+		var filePath = path.join(h.tmp, h.rndstr());
 		var data = h.rndstr();
-		var mode = parseInt('0776', 8);
-		fs.createFileSync(filePath, data, mode);
+		var mode = '776';
+		fs.createFileSync(filePath, data, { mode: mode });
 		return {
 			path: filePath,
 			data: data,
@@ -27,13 +26,13 @@ describe('Moving files', function () {
 
 		it('should move file, preserving its content and mode', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.moveFile(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 				fs.existsSync(dummy.path).should.not.be.ok;
 				String(fs.readFileSync(newPath)).should.equal(dummy.data);
 				if (notWin) {
-					fs.statSync(newPath).mode.should.equal(dummy.mode);
+					h.modestr(fs.statSync(newPath).mode).should.equal(dummy.mode);
 				}
 				done();
 			});
@@ -41,13 +40,13 @@ describe('Moving files', function () {
 
 		it('should create missing destination directories', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.moveFile(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 				fs.existsSync(dummy.path).should.not.be.ok;
 				String(fs.readFileSync(newPath)).should.equal(dummy.data);
 				if (notWin) {
-					fs.statSync(newPath).mode.should.equal(dummy.mode);
+					h.modestr(fs.statSync(newPath).mode).should.equal(dummy.mode);
 				}
 				done();
 			});
@@ -61,23 +60,23 @@ describe('Moving files', function () {
 
 		it('should move file, preserving its content and mode', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.moveFileSync(dummy.path, newPath);
 			fs.existsSync(dummy.path).should.not.be.ok;
 			String(fs.readFileSync(newPath)).should.equal(dummy.data);
 			if (notWin) {
-				fs.statSync(newPath).mode.should.equal(dummy.mode);
+				h.modestr(fs.statSync(newPath).mode).should.equal(dummy.mode);
 			}
 		});
 
 		it('should create missing destination directories', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.moveFileSync(dummy.path, newPath);
 			fs.existsSync(dummy.path).should.not.be.ok;
 			String(fs.readFileSync(newPath)).should.equal(dummy.data);
 			if (notWin) {
-				fs.statSync(newPath).mode.should.equal(dummy.mode);
+				h.modestr(fs.statSync(newPath).mode).should.equal(dummy.mode);
 			}
 		});
 
@@ -89,13 +88,13 @@ describe('Moving files', function () {
 
 		it('should move a file when path to a file is passed', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.move(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 				fs.existsSync(dummy.path).should.not.be.ok;
 				String(fs.readFileSync(newPath)).should.equal(dummy.data);
 				if (notWin) {
-					fs.statSync(newPath).mode.should.equal(dummy.mode);
+					h.modestr(fs.statSync(newPath).mode).should.equal(dummy.mode);
 				}
 				done();
 			});
@@ -107,12 +106,12 @@ describe('Moving files', function () {
 
 		it('should move a file when path to a file is passed', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.moveSync(dummy.path, newPath);
 			fs.existsSync(dummy.path).should.not.be.ok;
 			String(fs.readFileSync(newPath)).should.equal(dummy.data);
 			if (notWin) {
-				fs.statSync(newPath).mode.should.equal(dummy.mode);
+				h.modestr(fs.statSync(newPath).mode).should.equal(dummy.mode);
 			}
 		});
 
@@ -136,23 +135,18 @@ describe('Moving directories', function () {
 		h.rndstr(),
 	];
 	var modes = [
-		parseInt('0777', 8),
-		parseInt('0776', 8),
-		parseInt('0767', 8),
-		parseInt('0677', 8),
-		parseInt('0666', 8),
+		'777',
+		'776',
+		'767',
+		'766',
 	];
 
 	function createDummy() {
-		var dirPath = path.join(tmp, h.rndstr());
+		var dirPath = path.join(h.tmp, h.rndstr());
 		var map = {};
 		dirs.forEach(function (dir) {
 			var newPath = path.join(dirPath, dir);
-			var mode = modes[Math.floor(Math.random()*modes.length)];
-			map[newPath] = {
-				mode: mode,
-			};
-			fs.createDirSync(newPath, mode);
+			fs.createDirSync(newPath);
 		});
 		files.forEach(function (file) {
 			var filePath = path.join(dirPath, file);
@@ -162,7 +156,7 @@ describe('Moving directories', function () {
 				data: data,
 				mode: mode,
 			};
-			fs.createFileSync(filePath, data, mode);
+			fs.createFileSync(filePath, data, { mode: mode });
 		});
 		return {
 			path: dirPath,
@@ -171,26 +165,20 @@ describe('Moving directories', function () {
 	}
 
 	afterEach(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.moveDir()', function () {
 
 		it('should copy directory and everything in it from one location to another', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.moveDir(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 
 				// Check directories
 				dirs.forEach(function (dir) {
-					var oldDirPath = path.join(dummy.path, dir);
-					var newDirPath = path.join(newPath, dir);
-					var newStat = fs.statSync(newDirPath);
-					newStat.isDirectory().should.be.true;
-					if (notWin) {
-						dummy.map[oldDirPath].mode.should.equal(newStat.mode);
-					}
+					fs.statSync(path.join(newPath, dir)).isDirectory().should.be.true;
 				});
 
 				// Check files
@@ -202,7 +190,7 @@ describe('Moving directories', function () {
 					newStat.isFile().should.be.true;
 					dummy.map[oldFilePath].data.should.equal(newData);
 					if (notWin) {
-						dummy.map[oldFilePath].mode.should.equal(newStat.mode);
+						dummy.map[oldFilePath].mode.should.equal(h.modestr(newStat.mode));
 					}
 				});
 
@@ -212,19 +200,13 @@ describe('Moving directories', function () {
 
 		it('should create missing parent directories', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.moveDir(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 
 				// Check directories
 				dirs.forEach(function (dir) {
-					var oldDirPath = path.join(dummy.path, dir);
-					var newDirPath = path.join(newPath, dir);
-					var newStat = fs.statSync(newDirPath);
-					newStat.isDirectory().should.be.true;
-					if (notWin) {
-						dummy.map[oldDirPath].mode.should.equal(newStat.mode);
-					}
+					fs.statSync(path.join(newPath, dir)).isDirectory().should.be.true;
 				});
 
 				// Check files
@@ -236,7 +218,7 @@ describe('Moving directories', function () {
 					newStat.isFile().should.be.true;
 					dummy.map[oldFilePath].data.should.equal(newData);
 					if (notWin) {
-						dummy.map[oldFilePath].mode.should.equal(newStat.mode);
+						dummy.map[oldFilePath].mode.should.equal(h.modestr(newStat.mode));
 					}
 				});
 
@@ -252,18 +234,12 @@ describe('Moving directories', function () {
 
 		it('should copy directory and everything in it from one location to another', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.moveDirSync(dummy.path, newPath);
 
 			// Check directories
 			dirs.forEach(function (dir) {
-				var oldDirPath = path.join(dummy.path, dir);
-				var newDirPath = path.join(newPath, dir);
-				var newStat = fs.statSync(newDirPath);
-				newStat.isDirectory().should.be.true;
-				if (notWin) {
-					dummy.map[oldDirPath].mode.should.equal(newStat.mode);
-				}
+				fs.statSync(path.join(newPath, dir)).isDirectory().should.be.true;
 			});
 
 			// Check files
@@ -275,25 +251,19 @@ describe('Moving directories', function () {
 				newStat.isFile().should.be.true;
 				dummy.map[oldFilePath].data.should.equal(newData);
 				if (notWin) {
-					dummy.map[oldFilePath].mode.should.equal(newStat.mode);
+					dummy.map[oldFilePath].mode.should.equal(h.modestr(newStat.mode));
 				}
 			});
 		});
 
 		it('should create missing parent directories', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr(), h.rndstr(), h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr(), h.rndstr(), h.rndstr());
 			fs.moveDirSync(dummy.path, newPath);
 
 			// Check directories
 			dirs.forEach(function (dir) {
-				var oldDirPath = path.join(dummy.path, dir);
-				var newDirPath = path.join(newPath, dir);
-				var newStat = fs.statSync(newDirPath);
-				newStat.isDirectory().should.be.true;
-				if (notWin) {
-					dummy.map[oldDirPath].mode.should.equal(newStat.mode);
-				}
+				fs.statSync(path.join(newPath, dir)).isDirectory().should.be.true;
 			});
 
 			// Check files
@@ -305,7 +275,7 @@ describe('Moving directories', function () {
 				newStat.isFile().should.be.true;
 				dummy.map[oldFilePath].data.should.equal(newData);
 				if (notWin) {
-					dummy.map[oldFilePath].mode.should.equal(newStat.mode);
+					dummy.map[oldFilePath].mode.should.equal(h.modestr(newStat.mode));
 				}
 			});
 		});
@@ -318,19 +288,13 @@ describe('Moving directories', function () {
 
 		it('should move a directory when path to a directory is passed', function (done) {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.move(dummy.path, newPath, function (err) {
 				should.not.exist(err);
 
 				// Check directories
 				dirs.forEach(function (dir) {
-					var oldDirPath = path.join(dummy.path, dir);
-					var newDirPath = path.join(newPath, dir);
-					var newStat = fs.statSync(newDirPath);
-					newStat.isDirectory().should.be.true;
-					if (notWin) {
-						dummy.map[oldDirPath].mode.should.equal(newStat.mode);
-					}
+					fs.statSync(path.join(newPath, dir)).isDirectory().should.be.true;
 				});
 
 				// Check files
@@ -342,7 +306,7 @@ describe('Moving directories', function () {
 					newStat.isFile().should.be.true;
 					dummy.map[oldFilePath].data.should.equal(newData);
 					if (notWin) {
-						dummy.map[oldFilePath].mode.should.equal(newStat.mode);
+						dummy.map[oldFilePath].mode.should.equal(h.modestr(newStat.mode));
 					}
 				});
 
@@ -356,18 +320,12 @@ describe('Moving directories', function () {
 
 		it('should move a directory when path to a directory is passed', function () {
 			var dummy = createDummy();
-			var newPath = path.join(tmp, h.rndstr());
+			var newPath = path.join(h.tmp, h.rndstr());
 			fs.moveSync(dummy.path, newPath);
 
 			// Check directories
 			dirs.forEach(function (dir) {
-				var oldDirPath = path.join(dummy.path, dir);
-				var newDirPath = path.join(newPath, dir);
-				var newStat = fs.statSync(newDirPath);
-				newStat.isDirectory().should.be.true;
-				if (notWin) {
-					dummy.map[oldDirPath].mode.should.equal(newStat.mode);
-				}
+				fs.statSync(path.join(newPath, dir)).isDirectory().should.be.true;
 			});
 
 			// Check files
@@ -379,7 +337,7 @@ describe('Moving directories', function () {
 				newStat.isFile().should.be.true;
 				dummy.map[oldFilePath].data.should.equal(newData);
 				if (notWin) {
-					dummy.map[oldFilePath].mode.should.equal(newStat.mode);
+					dummy.map[oldFilePath].mode.should.equal(h.modestr(newStat.mode));
 				}
 			});
 		});

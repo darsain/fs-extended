@@ -5,19 +5,17 @@ var path = require('path');
 var should = require('should');
 var h = require('./lib/helpers');
 
-var tmp = 'tmp';
-
 describe('Emptying files:', function () {
 
 	function createDummy() {
-		var filePath = path.join(tmp, h.rndstr());
+		var filePath = path.join(h.tmp, h.rndstr());
 		var data = h.rndstr();
 		fs.createFileSync(filePath, data);
 		return filePath;
 	}
 
 	afterEach(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.emptyFile()', function () {
@@ -32,7 +30,7 @@ describe('Emptying files:', function () {
 		});
 
 		it('should create a new file when it doesn\'t exist', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.existsSync(filePath).should.be.false;
 			fs.emptyFile(filePath, function (err) {
 				should.not.exist(err);
@@ -52,7 +50,7 @@ describe('Emptying files:', function () {
 		});
 
 		it('should create a new file when it doesn\'t exist', function () {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.existsSync(filePath).should.be.false;
 			fs.emptyFileSync(filePath);
 			String(fs.readFileSync(filePath)).should.be.empty;
@@ -101,7 +99,7 @@ describe('Emptying directories:', function () {
 	];
 
 	function createDummy() {
-		var dirPath = path.join(tmp, h.rndstr());
+		var dirPath = path.join(h.tmp, h.rndstr());
 		dirs.forEach(function (dir) {
 			fs.createDirSync(path.join(dirPath, dir));
 		});
@@ -112,7 +110,7 @@ describe('Emptying directories:', function () {
 	}
 
 	afterEach(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.emptyDir()', function () {
@@ -127,7 +125,7 @@ describe('Emptying directories:', function () {
 		});
 
 		it('should create a directory when it doesn\'t exist', function (done) {
-			var dirPath = path.join(tmp, h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr());
 			fs.existsSync(dirPath).should.be.false;
 			fs.emptyDir(dirPath, function (err) {
 				should.not.exist(err);
@@ -147,7 +145,7 @@ describe('Emptying directories:', function () {
 		});
 
 		it('should create a directory when it doesn\'t exist', function () {
-			var dirPath = path.join(tmp, h.rndstr());
+			var dirPath = path.join(h.tmp, h.rndstr());
 			fs.existsSync(dirPath).should.be.false;
 			fs.emptyDirSync(dirPath);
 			fs.existsSync(dirPath).should.be.true;

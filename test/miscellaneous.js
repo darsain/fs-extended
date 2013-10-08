@@ -5,8 +5,6 @@ var path = require('path');
 var should = require('should');
 var h = require('./lib/helpers');
 
-var tmp = 'tmp';
-
 /**
  * Detect and return the indentation.
  *
@@ -32,13 +30,13 @@ function detectIndentation(string) {
 describe('Miscellaneous:', function () {
 
 	afterEach(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.uniquePath()', function () {
 
 		it('should return the same path when it doesn\'t exist', function (done) {
-			var oldPath = path.join(tmp, h.rndstr());
+			var oldPath = path.join(h.tmp, h.rndstr());
 			fs.uniquePath(oldPath, function (newPath) {
 				oldPath.should.equal(newPath);
 				done();
@@ -46,8 +44,8 @@ describe('Miscellaneous:', function () {
 		});
 
 		it('should return unique path when file does exist', function (done) {
-			var oldPath = path.join(tmp, h.rndstr());
-			fs.createFileSync(oldPath);
+			var oldPath = path.join(h.tmp, h.rndstr());
+			fs.ensureFileSync(oldPath);
 			fs.uniquePath(oldPath, function (newPath) {
 				oldPath.should.not.equal(newPath);
 				fs.existsSync(newPath).should.be.false;
@@ -56,8 +54,8 @@ describe('Miscellaneous:', function () {
 		});
 
 		it('should accept custom starting suffix index as a 2nd argument', function (done) {
-			var oldPath = path.join(tmp, h.rndstr());
-			fs.createFileSync(oldPath);
+			var oldPath = path.join(h.tmp, h.rndstr());
+			fs.ensureFileSync(oldPath);
 			fs.uniquePath(oldPath, 10, function (newPath) {
 				oldPath.should.not.equal(newPath);
 				fs.existsSync(newPath).should.be.false;
@@ -67,8 +65,8 @@ describe('Miscellaneous:', function () {
 		});
 
 		it('should keep file extension at the end of a filename', function (done) {
-			var oldPath = path.join(tmp, h.rndstr() + '.tar.gz');
-			fs.createFileSync(oldPath);
+			var oldPath = path.join(h.tmp, h.rndstr() + '.tar.gz');
+			fs.ensureFileSync(oldPath);
 			fs.uniquePath(oldPath, function (newPath) {
 				oldPath.should.not.equal(newPath);
 				fs.existsSync(newPath).should.be.false;
@@ -78,10 +76,10 @@ describe('Miscellaneous:', function () {
 		});
 
 		it('should increment suffix until unique path is reached', function (done) {
-			var oldPath = path.join(tmp, h.rndstr());
-			fs.createFileSync(oldPath);
-			fs.createFileSync(oldPath + '-2');
-			fs.createFileSync(oldPath + '-3');
+			var oldPath = path.join(h.tmp, h.rndstr());
+			fs.ensureFileSync(oldPath);
+			fs.ensureFileSync(oldPath + '-2');
+			fs.ensureFileSync(oldPath + '-3');
 			fs.uniquePath(oldPath, function (newPath) {
 				oldPath.should.not.equal(newPath);
 				fs.existsSync(newPath).should.be.false;
@@ -95,22 +93,22 @@ describe('Miscellaneous:', function () {
 	describe('.uniquePathSync()', function () {
 
 		it('should return the same path when it doesn\'t exist', function () {
-			var oldPath = path.join(tmp, h.rndstr());
+			var oldPath = path.join(h.tmp, h.rndstr());
 			var newPath = fs.uniquePathSync(oldPath);
 			oldPath.should.equal(newPath);
 		});
 
 		it('should return unique path when file does exist', function () {
-			var oldPath = path.join(tmp, h.rndstr());
-			fs.createFileSync(oldPath);
+			var oldPath = path.join(h.tmp, h.rndstr());
+			fs.ensureFileSync(oldPath);
 			var newPath = fs.uniquePathSync(oldPath);
 			oldPath.should.not.equal(newPath);
 			fs.existsSync(newPath).should.be.false;
 		});
 
 		it('should accept custom starting suffix index as a 2nd argument', function () {
-			var oldPath = path.join(tmp, h.rndstr());
-			fs.createFileSync(oldPath);
+			var oldPath = path.join(h.tmp, h.rndstr());
+			fs.ensureFileSync(oldPath);
 			var newPath = fs.uniquePathSync(oldPath, 10);
 			oldPath.should.not.equal(newPath);
 			fs.existsSync(newPath).should.be.false;
@@ -118,8 +116,8 @@ describe('Miscellaneous:', function () {
 		});
 
 		it('should keep file extension at the end of a filename', function () {
-			var oldPath = path.join(tmp, h.rndstr() + '.tar.gz');
-			fs.createFileSync(oldPath);
+			var oldPath = path.join(h.tmp, h.rndstr() + '.tar.gz');
+			fs.ensureFileSync(oldPath);
 			var newPath = fs.uniquePathSync(oldPath);
 			oldPath.should.not.equal(newPath);
 			fs.existsSync(newPath).should.be.false;
@@ -127,10 +125,10 @@ describe('Miscellaneous:', function () {
 		});
 
 		it('should increment suffix until unique path is reached', function () {
-			var oldPath = path.join(tmp, h.rndstr());
-			fs.createFileSync(oldPath);
-			fs.createFileSync(oldPath + '-2');
-			fs.createFileSync(oldPath + '-3');
+			var oldPath = path.join(h.tmp, h.rndstr());
+			fs.ensureFileSync(oldPath);
+			fs.ensureFileSync(oldPath + '-2');
+			fs.ensureFileSync(oldPath + '-3');
 			var newPath = fs.uniquePathSync(oldPath);
 			oldPath.should.not.equal(newPath);
 			fs.existsSync(newPath).should.be.false;
@@ -152,7 +150,7 @@ describe('Miscellaneous:', function () {
 	describe('.writeJSON()', function () {
 
 		it('should write object into a JSON file', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.writeJSON(filePath, obj, function (err) {
 				should.not.exist(err);
 				JSON.stringify(obj).should.equal(String(fs.readFileSync(filePath)));
@@ -161,7 +159,7 @@ describe('Miscellaneous:', function () {
 		});
 
 		it('should set indentation to number of spaces when number is passed', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.writeJSON(filePath, obj, 3, function (err) {
 				should.not.exist(err);
 				detectIndentation(String(fs.readFileSync(filePath))).should.equal('   ');
@@ -170,7 +168,7 @@ describe('Miscellaneous:', function () {
 		});
 
 		it('should set indentation to a custom character when non-number is passed', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.writeJSON(filePath, obj, '\t', function (err) {
 				should.not.exist(err);
 				detectIndentation(String(fs.readFileSync(filePath))).should.equal('\t');
@@ -191,19 +189,19 @@ describe('Miscellaneous:', function () {
 	describe('.writeJSONSync()', function () {
 
 		it('should write object into a JSON file', function () {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.writeJSONSync(filePath, obj);
 			JSON.stringify(obj).should.equal(String(fs.readFileSync(filePath)));
 		});
 
 		it('should set indentation to number of spaces when number is passed', function () {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.writeJSONSync(filePath, obj, 3);
 			detectIndentation(String(fs.readFileSync(filePath))).should.equal('   ');
 		});
 
 		it('should set indentation to a custom character when non-number is passed', function () {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.writeJSONSync(filePath, obj, '\t');
 			detectIndentation(String(fs.readFileSync(filePath))).should.equal('\t');
 		});
@@ -221,7 +219,7 @@ describe('Miscellaneous:', function () {
 	describe('.readJSON()', function () {
 
 		it('should read a JSON file', function (done) {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.writeJSONSync(filePath, obj);
 			fs.readJSON(filePath, function (err, data) {
 				should.not.exist(err);
@@ -243,7 +241,7 @@ describe('Miscellaneous:', function () {
 	describe('.readJSONSync()', function () {
 
 		it('should read a JSON file', function () {
-			var filePath = path.join(tmp, h.rndstr());
+			var filePath = path.join(h.tmp, h.rndstr());
 			fs.writeJSONSync(filePath, obj);
 			var data = fs.readJSONSync(filePath);
 			JSON.stringify(data).should.equal(JSON.stringify(obj));

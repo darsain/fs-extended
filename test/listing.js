@@ -3,8 +3,7 @@
 var fs = require('../index');
 var path = require('path');
 var should = require('should');
-
-var tmp = 'tmp';
+var h = require('./lib/helpers');
 
 describe('Listing:', function () {
 	var dirs = [
@@ -28,23 +27,23 @@ describe('Listing:', function () {
 	];
 
 	before(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 		dirs.forEach(function (dir) {
-			fs.createDirSync(path.join(tmp, dir));
+			fs.createDirSync(path.join(h.tmp, dir));
 		});
 		files.forEach(function (file) {
-			fs.createFileSync(path.join(tmp, file), '');
+			fs.createFileSync(path.join(h.tmp, file), '');
 		});
 	});
 
 	after(function () {
-		fs.emptyDirSync(tmp);
+		fs.emptyDirSync(h.tmp);
 	});
 
 	describe('.listAll()', function () {
 
 		it('should return an empty array when directory is empty', function (done) {
-			fs.listAll(path.join(tmp, 'empty'), function (err, items) {
+			fs.listAll(path.join(h.tmp, 'empty'), function (err, items) {
 				should.not.exist(err);
 				items.should.be.an.instanceOf(Array).with.lengthOf(0);
 				done();
@@ -52,7 +51,7 @@ describe('Listing:', function () {
 		});
 
 		it('should list all items in a directory when no options are passed', function (done) {
-			fs.listAll(tmp, function (err, items) {
+			fs.listAll(h.tmp, function (err, items) {
 				should.not.exist(err);
 				items.should.be.an.instanceOf(Array).with.lengthOf(6);
 				done();
@@ -63,7 +62,7 @@ describe('Listing:', function () {
 			var options = {
 				recursive: 1
 			};
-			fs.listAll(tmp, options, function (err, items) {
+			fs.listAll(h.tmp, options, function (err, items) {
 				should.not.exist(err);
 				items.should.be.an.instanceOf(Array).with.lengthOf(dirs.length + files.length);
 				dirs.forEach(function (dirPath) {
@@ -85,7 +84,7 @@ describe('Listing:', function () {
 			var options = {
 				filter: filter
 			};
-			fs.listAll(tmp, options, function (err, items) {
+			fs.listAll(h.tmp, options, function (err, items) {
 				should.not.exist(err);
 				items.should.be.an.instanceOf(Array).with.lengthOf(1);
 				done();
@@ -105,7 +104,7 @@ describe('Listing:', function () {
 			var options = {
 				map: map
 			};
-			fs.listAll(tmp, options, function (err, items) {
+			fs.listAll(h.tmp, options, function (err, items) {
 				should.not.exist(err);
 				items.should.be.an.instanceOf(Array);
 				items.forEach(function (item) {
@@ -126,14 +125,14 @@ describe('Listing:', function () {
 				recursive: 1,
 				prependDir: 1
 			};
-			fs.listAll(tmp, options, function (err, items) {
+			fs.listAll(h.tmp, options, function (err, items) {
 				should.not.exist(err);
 				items.should.be.an.instanceOf(Array).with.lengthOf(dirs.length + files.length);
 				dirs.forEach(function (dirPath) {
-					items.indexOf(path.join(tmp, dirPath)).should.not.equal(-1);
+					items.indexOf(path.join(h.tmp, dirPath)).should.not.equal(-1);
 				});
 				files.forEach(function (filePath) {
-					items.indexOf(path.join(tmp, filePath)).should.not.equal(-1);
+					items.indexOf(path.join(h.tmp, filePath)).should.not.equal(-1);
 				});
 				done();
 			});
@@ -144,12 +143,12 @@ describe('Listing:', function () {
 	describe('.listAllSync()', function () {
 
 		it('should return an empty array when directory is empty', function () {
-			var items = fs.listAllSync(path.join(tmp, 'empty'));
+			var items = fs.listAllSync(path.join(h.tmp, 'empty'));
 			items.should.be.an.instanceOf(Array).with.lengthOf(0);
 		});
 
 		it('should list all items in a directory when no options are passed', function () {
-			var items = fs.listAllSync(tmp);
+			var items = fs.listAllSync(h.tmp);
 			items.should.be.an.instanceOf(Array).with.lengthOf(6);
 		});
 
@@ -157,7 +156,7 @@ describe('Listing:', function () {
 			var options = {
 				recursive: 1
 			};
-			var items = fs.listAllSync(tmp, options);
+			var items = fs.listAllSync(h.tmp, options);
 			items.should.be.an.instanceOf(Array).with.lengthOf(dirs.length + files.length);
 			dirs.forEach(function (dirPath) {
 				items.indexOf(dirPath).should.not.equal(-1);
@@ -176,7 +175,7 @@ describe('Listing:', function () {
 			var options = {
 				filter: filter
 			};
-			var items = fs.listAllSync(tmp, options);
+			var items = fs.listAllSync(h.tmp, options);
 			items.should.be.an.instanceOf(Array).with.lengthOf(1);
 		});
 
@@ -193,7 +192,7 @@ describe('Listing:', function () {
 			var options = {
 				map: map
 			};
-			var items = fs.listAllSync(tmp, options);
+			var items = fs.listAllSync(h.tmp, options);
 			items.should.be.an.instanceOf(Array);
 			items.forEach(function (item) {
 				item.should.be.an.instanceOf(Object);
@@ -211,13 +210,13 @@ describe('Listing:', function () {
 				recursive: 1,
 				prependDir: 1
 			};
-			var items = fs.listAllSync(tmp, options);
+			var items = fs.listAllSync(h.tmp, options);
 			items.should.be.an.instanceOf(Array).with.lengthOf(dirs.length + files.length);
 			dirs.forEach(function (dirPath) {
-				items.indexOf(path.join(tmp, dirPath)).should.not.equal(-1);
+				items.indexOf(path.join(h.tmp, dirPath)).should.not.equal(-1);
 			});
 			files.forEach(function (filePath) {
-				items.indexOf(path.join(tmp, filePath)).should.not.equal(-1);
+				items.indexOf(path.join(h.tmp, filePath)).should.not.equal(-1);
 			});
 		});
 
@@ -226,7 +225,7 @@ describe('Listing:', function () {
 	describe('.listFiles()', function () {
 
 		it('should return an empty array when directory is empty', function (done) {
-			fs.listFiles(path.join(tmp, 'empty'), function (err, files) {
+			fs.listFiles(path.join(h.tmp, 'empty'), function (err, files) {
 				should.not.exist(err);
 				files.should.be.an.instanceOf(Array).with.lengthOf(0);
 				done();
@@ -234,11 +233,11 @@ describe('Listing:', function () {
 		});
 
 		it('should list all files in a directory when no options are passed', function (done) {
-			fs.listFiles(tmp, function (err, files) {
+			fs.listFiles(h.tmp, function (err, files) {
 				should.not.exist(err);
 				files.should.be.an.instanceOf(Array).with.lengthOf(3);
 				files.forEach(function (file) {
-					fs.statSync(path.join(tmp, file)).isFile().should.be.true;
+					fs.statSync(path.join(h.tmp, file)).isFile().should.be.true;
 				});
 				done();
 			});
@@ -248,7 +247,7 @@ describe('Listing:', function () {
 			var options = {
 				recursive: 1
 			};
-			fs.listFiles(tmp, options, function (err, fls) {
+			fs.listFiles(h.tmp, options, function (err, fls) {
 				should.not.exist(err);
 				fls.should.be.an.instanceOf(Array).with.lengthOf(files.length);
 				files.forEach(function (filePath) {
@@ -267,10 +266,10 @@ describe('Listing:', function () {
 			var options = {
 				filter: filter
 			};
-			fs.listFiles(tmp, options, function (err, files) {
+			fs.listFiles(h.tmp, options, function (err, files) {
 				should.not.exist(err);
 				files.should.be.an.instanceOf(Array).with.lengthOf(1);
-				fs.statSync(path.join(tmp, files[0])).isFile().should.be.true;
+				fs.statSync(path.join(h.tmp, files[0])).isFile().should.be.true;
 				done();
 			});
 		});
@@ -287,7 +286,7 @@ describe('Listing:', function () {
 			var options = {
 				map: map
 			};
-			fs.listFiles(tmp, options, function (err, files) {
+			fs.listFiles(h.tmp, options, function (err, files) {
 				should.not.exist(err);
 				files.should.be.an.instanceOf(Array);
 				files.forEach(function (file) {
@@ -306,11 +305,11 @@ describe('Listing:', function () {
 				recursive: 1,
 				prependDir: 1
 			};
-			fs.listFiles(tmp, options, function (err, fls) {
+			fs.listFiles(h.tmp, options, function (err, fls) {
 				should.not.exist(err);
 				fls.should.be.an.instanceOf(Array).with.lengthOf(files.length);
 				files.forEach(function (filePath) {
-					fls.indexOf(path.join(tmp, filePath)).should.not.equal(-1);
+					fls.indexOf(path.join(h.tmp, filePath)).should.not.equal(-1);
 				});
 				done();
 			});
@@ -321,15 +320,15 @@ describe('Listing:', function () {
 	describe('.listFilesSync()', function () {
 
 		it('should return an empty array when directory is empty', function () {
-			var fls = fs.listFilesSync(path.join(tmp, 'empty'));
+			var fls = fs.listFilesSync(path.join(h.tmp, 'empty'));
 			fls.should.be.an.instanceOf(Array).with.lengthOf(0);
 		});
 
 		it('should list all files in a directory when no options are passed', function () {
-			var fls = fs.listFilesSync(tmp);
+			var fls = fs.listFilesSync(h.tmp);
 			fls.should.be.an.instanceOf(Array).with.lengthOf(3);
 			files.forEach(function (file) {
-				fs.statSync(path.join(tmp, file)).isFile().should.be.true;
+				fs.statSync(path.join(h.tmp, file)).isFile().should.be.true;
 			});
 		});
 
@@ -337,7 +336,7 @@ describe('Listing:', function () {
 			var options = {
 				recursive: 1
 			};
-			var fls = fs.listFilesSync(tmp, options);
+			var fls = fs.listFilesSync(h.tmp, options);
 			fls.should.be.an.instanceOf(Array).with.lengthOf(files.length);
 			files.forEach(function (filePath) {
 				fls.indexOf(filePath).should.not.equal(-1);
@@ -353,9 +352,9 @@ describe('Listing:', function () {
 			var options = {
 				filter: filter
 			};
-			var fls = fs.listFilesSync(tmp, options);
+			var fls = fs.listFilesSync(h.tmp, options);
 			fls.should.be.an.instanceOf(Array).with.lengthOf(1);
-			fs.statSync(path.join(tmp, fls[0])).isFile().should.be.true;
+			fs.statSync(path.join(h.tmp, fls[0])).isFile().should.be.true;
 		});
 
 		it('should map list items with options.map function', function () {
@@ -370,7 +369,7 @@ describe('Listing:', function () {
 			var options = {
 				map: map
 			};
-			var files = fs.listFilesSync(tmp, options);
+			var files = fs.listFilesSync(h.tmp, options);
 			files.should.be.an.instanceOf(Array);
 			files.forEach(function (file) {
 				file.should.be.an.instanceOf(Object);
@@ -386,10 +385,10 @@ describe('Listing:', function () {
 				recursive: 1,
 				prependDir: 1
 			};
-			var fls = fs.listFilesSync(tmp, options);
+			var fls = fs.listFilesSync(h.tmp, options);
 			fls.should.be.an.instanceOf(Array).with.lengthOf(files.length);
 			files.forEach(function (filePath) {
-				fls.indexOf(path.join(tmp, filePath)).should.not.equal(-1);
+				fls.indexOf(path.join(h.tmp, filePath)).should.not.equal(-1);
 			});
 		});
 
@@ -398,7 +397,7 @@ describe('Listing:', function () {
 	describe('.listDirs()', function () {
 
 		it('should return an empty array when directory is empty', function (done) {
-			fs.listDirs(path.join(tmp, 'empty'), function (err, dirs) {
+			fs.listDirs(path.join(h.tmp, 'empty'), function (err, dirs) {
 				should.not.exist(err);
 				dirs.should.be.an.instanceOf(Array).with.lengthOf(0);
 				done();
@@ -406,11 +405,11 @@ describe('Listing:', function () {
 		});
 
 		it('should list all directories in a directory when no options are passed', function (done) {
-			fs.listDirs(tmp, function (err, dirs) {
+			fs.listDirs(h.tmp, function (err, dirs) {
 				should.not.exist(err);
 				dirs.should.be.an.instanceOf(Array).with.lengthOf(3);
 				dirs.forEach(function (file) {
-					fs.statSync(path.join(tmp, file)).isDirectory().should.be.true;
+					fs.statSync(path.join(h.tmp, file)).isDirectory().should.be.true;
 				});
 				done();
 			});
@@ -420,7 +419,7 @@ describe('Listing:', function () {
 			var options = {
 				recursive: 1
 			};
-			fs.listDirs(tmp, options, function (err, drs) {
+			fs.listDirs(h.tmp, options, function (err, drs) {
 				should.not.exist(err);
 				drs.should.be.an.instanceOf(Array).with.lengthOf(dirs.length);
 				dirs.forEach(function (filePath) {
@@ -439,10 +438,10 @@ describe('Listing:', function () {
 			var options = {
 				filter: filter
 			};
-			fs.listDirs(tmp, options, function (err, dirs) {
+			fs.listDirs(h.tmp, options, function (err, dirs) {
 				should.not.exist(err);
 				dirs.should.be.an.instanceOf(Array).with.lengthOf(1);
-				fs.statSync(path.join(tmp, dirs[0])).isDirectory().should.be.true;
+				fs.statSync(path.join(h.tmp, dirs[0])).isDirectory().should.be.true;
 				done();
 			});
 		});
@@ -459,7 +458,7 @@ describe('Listing:', function () {
 			var options = {
 				map: map
 			};
-			fs.listDirs(tmp, options, function (err, dirs) {
+			fs.listDirs(h.tmp, options, function (err, dirs) {
 				should.not.exist(err);
 				dirs.should.be.an.instanceOf(Array);
 				dirs.forEach(function (dir) {
@@ -478,11 +477,11 @@ describe('Listing:', function () {
 				recursive: 1,
 				prependDir: 1
 			};
-			fs.listDirs(tmp, options, function (err, drs) {
+			fs.listDirs(h.tmp, options, function (err, drs) {
 				should.not.exist(err);
 				drs.should.be.an.instanceOf(Array).with.lengthOf(dirs.length);
 				dirs.forEach(function (filePath) {
-					drs.indexOf(path.join(tmp, filePath)).should.not.equal(-1);
+					drs.indexOf(path.join(h.tmp, filePath)).should.not.equal(-1);
 				});
 				done();
 			});
@@ -493,15 +492,15 @@ describe('Listing:', function () {
 	describe('.listDirsSync()', function () {
 
 		it('should return an empty array when directory is empty', function () {
-			var drs = fs.listDirsSync(path.join(tmp, 'empty'));
+			var drs = fs.listDirsSync(path.join(h.tmp, 'empty'));
 			drs.should.be.an.instanceOf(Array).with.lengthOf(0);
 		});
 
 		it('should list all directories in a directory when no options are passed', function () {
-			var drs = fs.listDirsSync(tmp);
+			var drs = fs.listDirsSync(h.tmp);
 			drs.should.be.an.instanceOf(Array).with.lengthOf(3);
 			drs.forEach(function (file) {
-				fs.statSync(path.join(tmp, file)).isDirectory().should.be.true;
+				fs.statSync(path.join(h.tmp, file)).isDirectory().should.be.true;
 			});
 		});
 
@@ -509,7 +508,7 @@ describe('Listing:', function () {
 			var options = {
 				recursive: 1
 			};
-			var drs = fs.listDirsSync(tmp, options);
+			var drs = fs.listDirsSync(h.tmp, options);
 			drs.should.be.an.instanceOf(Array).with.lengthOf(dirs.length);
 			dirs.forEach(function (filePath) {
 				drs.indexOf(filePath).should.not.equal(-1);
@@ -525,9 +524,9 @@ describe('Listing:', function () {
 			var options = {
 				filter: filter
 			};
-			var drs = fs.listDirsSync(tmp, options);
+			var drs = fs.listDirsSync(h.tmp, options);
 			drs.should.be.an.instanceOf(Array).with.lengthOf(1);
-			fs.statSync(path.join(tmp, drs[0])).isDirectory().should.be.true;
+			fs.statSync(path.join(h.tmp, drs[0])).isDirectory().should.be.true;
 		});
 
 		it('should map list items with options.map function', function () {
@@ -542,7 +541,7 @@ describe('Listing:', function () {
 			var options = {
 				map: map
 			};
-			var dirs = fs.listDirsSync(tmp, options);
+			var dirs = fs.listDirsSync(h.tmp, options);
 			dirs.should.be.an.instanceOf(Array);
 			dirs.forEach(function (dir) {
 				dir.should.be.an.instanceOf(Object);
@@ -558,10 +557,10 @@ describe('Listing:', function () {
 				recursive: 1,
 				prependDir: 1
 			};
-			var drs = fs.listDirsSync(tmp, options);
+			var drs = fs.listDirsSync(h.tmp, options);
 			drs.should.be.an.instanceOf(Array).with.lengthOf(dirs.length);
 			dirs.forEach(function (filePath) {
-				drs.indexOf(path.join(tmp, filePath)).should.not.equal(-1);
+				drs.indexOf(path.join(h.tmp, filePath)).should.not.equal(-1);
 			});
 		});
 
