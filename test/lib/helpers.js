@@ -11,7 +11,7 @@ module.exports = {
 	 *
 	 * @type {String}
 	 */
-	tmp: path.join(os.tmpdir(), 'fs-extended-test'),
+	tmp: path.join(os.tmpdir ? os.tmpdir() : os.tmpDir(), 'fs-extended-test'),
 
 	/**
 	 * Generate random string.
