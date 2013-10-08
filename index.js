@@ -13,14 +13,36 @@ module.exports = fs;
 function dummy() {}
 
 /**
- * Normalize mode argument. Defaults to 0666.
+ * Normalizes mode argument into a decimal integer.
+ *
+ * Examples:
+ *   0666  = 438
+ *   '777' = 511
  *
  * @param  {Mixed} mode
  *
  * @return {Int}
  */
-function normode(mode, def) {
-	return typeof mode === 'string' ? parseInt(mode, 8) : mode || def || 438;
+function modenum(mode, def) {
+	switch (typeof mode) {
+		case 'number': return mode;
+		case 'string': return parseInt(mode, 8);
+		default: return def ? modenum(def) : undefined;
+	}
+}
+
+/**
+ * Converts fs.Stats.mode format to a decimal notation to match modenum().
+ *
+ * Examples:
+ *   16895 => 511
+ *
+ * @param  {Mixed} mode
+ *
+ * @return {Int}
+ */
+function statmode(mode) {
+	return mode & 511;
 }
 
 /**
@@ -153,7 +175,7 @@ fs.ensureFile = function (file, mode, callback) {
 	}
 	file = path.resolve(file);
 	callback = norback(callback);
-	var newMode = normode(mode);
+	var newMode = modenum(mode, 438);
 	var fileCreatedErr;
 
 	create(fileCreated);
@@ -197,7 +219,7 @@ fs.ensureFile = function (file, mode, callback) {
 			return callback(fileCreatedErr);
 		}
 
-		if (mode && normode(stat.mode) !== newMode) {
+		if (mode && statmode(stat.mode) + process.umask() !== newMode) {
 			fs.chmod(file, newMode, callback);
 		} else {
 			callback(null);
@@ -215,7 +237,7 @@ fs.ensureFile = function (file, mode, callback) {
  */
 fs.ensureFileSync = function (file, mode) {
 	file = path.resolve(file);
-	var newMode = normode(mode);
+	var newMode = modenum(mode);
 
 	try {
 		create();
@@ -233,7 +255,7 @@ fs.ensureFileSync = function (file, mode) {
 					throw err;
 				}
 
-				if (mode && normode(stat.mode) !== newMode) {
+				if (mode && statmode(stat.mode) + process.umask() !== newMode) {
 					fs.chmodSync(file, newMode);
 				}
 				break;
@@ -269,7 +291,7 @@ fs.copyFile = function (src, dst, callback) {
 		if (err) {
 			return callback(err);
 		}
-		mode = normode(stat.mode);
+		mode = statmode(stat.mode);
 		createRead();
 		createWrite();
 	}
@@ -332,7 +354,7 @@ fs.copyFileSync = function (src, dst) {
 	dst = path.resolve(dst);
 	var BUF_LENGTH = 64 * 1024;
 	var buff = new Buffer(BUF_LENGTH);
-	var mode = normode(fs.statSync(src).mode);
+	var mode = statmode(fs.statSync(src).mode);
 	var fdr = fs.openSync(src, 'r');
 	var fdw;
 	var bytesRead = 1;
@@ -528,7 +550,7 @@ fs.createDir = function (dir, mode, callback) {
 	}
 	dir = path.resolve(dir);
 	callback = norback(callback);
-	var newMode = normode(mode, 511);
+	var newMode = modenum(mode, 511);
 	var dirCreatedErr;
 
 	create(dirCreated);
@@ -572,7 +594,7 @@ fs.createDir = function (dir, mode, callback) {
 			return callback(dirCreatedErr);
 		}
 
-		if (mode && normode(stat.mode) !== newMode) {
+		if (mode && statmode(stat.mode) + process.umask() !== newMode) {
 			fs.chmod(dir, newMode, callback);
 		} else {
 			callback(null);
@@ -590,7 +612,7 @@ fs.createDir = function (dir, mode, callback) {
  */
 fs.createDirSync = function (dir, mode) {
 	dir = path.resolve(dir);
-	var newMode = normode(mode, 511);
+	var newMode = modenum(mode, 511);
 
 	try {
 		create();
@@ -608,7 +630,7 @@ fs.createDirSync = function (dir, mode) {
 					throw err;
 				}
 
-				if (mode && normode(stat.mode) !== newMode) {
+				if (mode && statmode(stat.mode) + process.umask() !== newMode) {
 					fs.chmodSync(dir, newMode);
 				}
 				break;
@@ -645,7 +667,7 @@ fs.copyDir = function (src, dst, callback) {
 		if (err) {
 			return callback(err);
 		}
-		fs.createDir(dst, normode(stat.mode), dirCreated);
+		fs.createDir(dst, statmode(stat.mode), dirCreated);
 	}
 
 	function dirCreated(err) {
