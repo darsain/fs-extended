@@ -41,7 +41,7 @@ Creates a new, or overrides an existing file. Creates any missing parent directo
 - **data** `String|Buffer` Contents of a new file.
 - **[options]** `Object` Object with options (will be passed to `fs.writeFile`):
 	- *encoding* `String|Null` File encoding. Defaults to `utf8`.
-	- *mode* `Number` File mode. Defaults to `0666`.
+	- *mode* `Number` File mode. Defaults to `0666`. The final mode is dependent on process `umask`.
 	- *flag* `String` File open flag. Defaults to `w`.
 - **[callback]** `Function` Receives arguments:
 	- *err* `Mixed` Error object on error, `null` otherwise.
@@ -56,7 +56,7 @@ Ensures file exists. If it does, it'll only ensure file `mode` (when passed). If
 Creates any missing parent directories.
 
 - **path** `String` Path to a file.
-- **[mode]** `Object` File mode. Defaults to `0666`.
+- **[mode]** `Object` File mode. Defaults to `0666`. The final mode is dependent on process `umask`.
 - **[callback]** `Function` Receives arguments:
 	- *err* `Mixed` Error object on error, `null` otherwise.
 
@@ -127,7 +127,7 @@ Synchronous `fs.deleteFile()`;
 Creates a directory, and any missing parent directories. If directory exists, it only ensures `mode` (when passed).
 
 - **dir** `String` Path to a new directory.
-- **[mode]** `Object` Directory mode. Defaults to `0777`.
+- **[mode]** `Object` Directory mode. Defaults to `0777`. The final mode is dependent on process `umask`.
 - **[callback]** `Function` Receives arguments:
 	- *err* `Mixed` Error object on error, `null` otherwise.
 
