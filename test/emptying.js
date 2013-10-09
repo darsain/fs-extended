@@ -3,7 +3,7 @@
 var fs = require('../index');
 var path = require('path');
 var should = require('should');
-var h = require('./lib/helpers');
+var h = require('./helpers');
 
 describe('Emptying files:', function () {
 

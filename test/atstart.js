@@ -3,7 +3,7 @@
 process.umask(0);
 
 var fs = require('../index');
-var h = require('./lib/helpers');
+var h = require('./helpers');
 
 before(function () {
 	fs.createDirSync(h.tmp);

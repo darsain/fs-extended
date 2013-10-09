@@ -3,7 +3,7 @@
 var fs = require('../index');
 var path = require('path');
 var should = require('should');
-var h = require('./lib/helpers');
+var h = require('./helpers');
 
 describe('Listing:', function () {
 	var dirs = [
@@ -32,7 +32,7 @@ describe('Listing:', function () {
 			fs.createDirSync(path.join(h.tmp, dir));
 		});
 		files.forEach(function (file) {
-			fs.createFileSync(path.join(h.tmp, file), '');
+			fs.createFileSync(path.join(h.tmp, file), h.rndstr(Math.round(Math.random()*100)));
 		});
 	});
 
@@ -120,6 +120,32 @@ describe('Listing:', function () {
 			});
 		});
 
+		it('should map and sort items with a compare function', function (done) {
+			function map(filePath, stat) {
+				return {
+					path: filePath,
+					size: stat.size,
+				};
+			}
+			function compare(a, b) {
+				return a.size < b.size ? -1 : 1;
+			}
+			var options = {
+				map: map,
+				sort: compare,
+			};
+			fs.listAll(h.tmp, options, function (err, items) {
+				should.not.exist(err);
+				items.should.be.an.instanceOf(Array);
+				var prevItemSize = -1;
+				items.forEach(function (item) {
+					(item.size >= prevItemSize).should.be.true;
+					prevItemSize = item.size;
+				});
+				done();
+			});
+		});
+
 		it('should prepend directory path to items when prependDir is enabled', function (done) {
 			var options = {
 				recursive: 1,
@@ -202,6 +228,29 @@ describe('Listing:', function () {
 				item.path.should.be.a.String;
 				item.isFile.should.be.a.Boolean;
 				item.isDirectory.should.be.a.Boolean;
+			});
+		});
+
+		it('should map and sort items based on mapped data', function () {
+			function map(filePath, stat) {
+				return {
+					path: filePath,
+					size: stat.size,
+				};
+			}
+			function compare(a, b) {
+				return a.size < b.size ? -1 : 1;
+			}
+			var options = {
+				map: map,
+				sort: compare,
+			};
+			var items = fs.listAllSync(h.tmp, options);
+			items.should.be.an.instanceOf(Array);
+			var prevItemSize = -1;
+			items.forEach(function (item) {
+				(item.size >= prevItemSize).should.be.true;
+				prevItemSize = item.size;
 			});
 		});
 
