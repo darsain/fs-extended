@@ -324,7 +324,7 @@ fs.copyFile = function (src, dst, callback) {
 	function error(err) {
 		// This is an embarrassing attempt to terminate streams in any state without them memory
 		// leaking, or causing uncaught errors that might crash the process. I have no idea how
-		// to do this properly, as this shit is just not fucking documented. Node docs suck ass.
+		// to do this properly, as this shit is just not fucking documented. Node docs suck.
 		read.removeAllListeners('error');
 		write.removeAllListeners('open');
 		write.removeAllListeners('error');
@@ -689,7 +689,7 @@ fs.copyDir = function (src, dst, callback) {
 		if (!files.length) {
 			return callback(null);
 		}
-		var file = files.shift();
+		var file = files.pop();
 		var filePath = path.join(src, file);
 		var destPath = path.join(dst, file);
 		fs.stat(filePath, function (err, stat) {
@@ -855,7 +855,7 @@ fs.emptyDir = function (dir, callback) {
 		if (!files.length) {
 			return callback(null);
 		}
-		file = files.shift();
+		file = files.pop();
 		filePath = path.join(dir, file);
 		fs.stat(filePath, processFile);
 	}
@@ -1132,7 +1132,7 @@ fs.deleteSync = function (target) {
  * List all files in directory.
  *
  * @param  {String}   dir
- * @param  {Object}   options
+ * @param  {Object}   [options]
  * @param  {Function} callback
  * @param  {Boolean}  [baseDir]
  *
@@ -1140,10 +1140,15 @@ fs.deleteSync = function (target) {
  */
 function listAll(dir, options, callback, baseDir) {
 	if (typeof options === 'function') {
+		baseDir = callback;
 		callback = options;
 		options = false;
 	}
+	var loadStats = options.recursive ||
+		options.filter && options.filter.length > 1 ||
+		options.map && options.map.length > 1;
 	var list = [];
+	var i = 0;
 	var files, file, filePath;
 
 	fs.readdir(dir, startWalking);
@@ -1157,12 +1162,16 @@ function listAll(dir, options, callback, baseDir) {
 	}
 
 	function next() {
-		if (!files.length) {
+		if (i >= files.length) {
 			return callback(null, list);
 		}
-		file = files.shift();
+		file = files[i++];
 		filePath = path.join(dir, file);
-		fs.stat(filePath, processFile);
+		if (loadStats) {
+			fs.stat(filePath, processFile);
+		} else {
+			processFile();
+		}
 	}
 
 	function processFile(err, stat) {
@@ -1194,7 +1203,7 @@ function listAll(dir, options, callback, baseDir) {
  * Synchronous listAll().
  *
  * @param  {String}  dir
- * @param  {Object}  options
+ * @param  {Object}  [options]
  * @param  {Boolean} [baseDir]
  *
  * @return {Array} List of files in dir.
@@ -1204,13 +1213,18 @@ function listAllSync(dir, options, baseDir) {
 		baseDir = options;
 		options = false;
 	}
+	var loadStats = options.recursive ||
+		options.filter && options.filter.length > 1 ||
+		options.map && options.map.length > 1;
 	var list = [];
 	var files = fs.readdirSync(dir);
 	var file, filePath, stat;
 	for (var i = 0, l = files.length; i < l; i++) {
 		file = files[i];
 		filePath = path.join(dir, file);
-		stat = fs.statSync(filePath);
+		if (loadStats) {
+			stat = fs.statSync(filePath);
+		}
 		if (!options.filter || options.filter(filePath, stat)) {
 			list.push(options.map ?
 				options.map(filePath, stat) :
