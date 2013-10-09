@@ -255,7 +255,7 @@ Synchronous `fs.delete()`;
 
 ### fs.listAll(dir, [options], [callback]);
 
-List all items inside a directory. Supports filtering and recursive listing.
+List all directories and files inside a directory.
 
 - **dir** `String` Path to a directory.
 - **[options]** `Object` Object with options:
@@ -263,17 +263,30 @@ List all items inside a directory. Supports filtering and recursive listing.
 	- *prependDir* `Boolean` Prepend `dir` path before every item in final array. Defaults to `false`.
 	- *filter* `Function` Function to filter items. Should return `true` or `false`. Receives arguments:
 		- *itemPath* `String` Full path to an item.
-		- *stat* `Object` Item's [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) object.
-	- *map* `Function` Function to map final list items. Receives arguments:
+		- *stat* [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) Object with data about a file.
+	- *map* `Function` Function to map final list items. Mapping is applied after *filter*. Receives arguments:
 		- *itemPath* `String` Full path to an item.
-		- *stat* `Object` Item's [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) object.
+		- *stat* [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) Object with data about a file.
+	- *sort* `Boolean | Function` Pass `true` to sort files
+		[lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order), or a compare function you'd normally
+		pass to an `Array.sort()`. Sorting is applied after *filter* & *map*. Function accepts two file paths (or
+		whatever *map* returned) for comparison.
 - **[callback]** `Function` Receives arguments:
 	- *err* `Mixed` Error object on error, `null` otherwise.
 	- *list* `Array` List of items inside a directory.
 
+The purpose of built-in filter/map functions is to recycle `fs.Stats` objects when needed, as loading this objects is
+the biggest bottleneck when listing files recursively.
+
+The `fs.Stats` for each file is loaded only when recursive listing is requested, or filter/map functions accept it as an
+argument.
+
+On the other hand, if your filter/map needs something that `fs.Stat` provides, just use it. There is no way how to make
+data retrieval by `fs.stat()` faster (I'd like to be corrected on this if I'm wrong! :)).
+
 ##### Examples
 
-Filtering - effectively turn `fs.listAll()` into `fs.listFiles()`:
+Filter out directories, effectively turning `fs.listAll()` into `fs.listFiles()`:
 
 ```js
 function filter(itemPath, stat) {
@@ -283,10 +296,10 @@ function filter(itemPath, stat) {
 fs.listAll(dir, { filter: filter }, function (err, files) {
 	console.log(err);   // possible exception
 	console.log(files); // array of all files inside a directory
-})
+});
 ```
 
-Mapping - change the style of a final list:
+Map files into a more descriptive array of objects:
 
 ```js
 function map(itemPath, stat) {
@@ -294,8 +307,7 @@ function map(itemPath, stat) {
 		path: itemPath,
 		name: path.basename(itemPath),
 		ext: path.extname(itemPath),
-		isFile: stat.isFile(),
-		isDirectory: stat.isDirectory(),
+		size: stat.size,
 	};
 }
 
@@ -305,7 +317,29 @@ fs.listAll(dir, { map: map }, function (err, files) {
 	// Example
 	files[0].path; // 1st file's path
 	files[0].ext;  // 1st file's extension
-})
+});
+```
+
+Sort files by their name [lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order):
+
+```js
+fs.listAll(dir, { sort: true }, function (err, files) {
+	console.log(err);   // possible exception
+	console.log(files); // sorted array of files
+});
+```
+
+Sort files by their extension with a compare function:
+
+```js
+function compare(a, b) {
+	return path.extname(a) < path.extname(b) ? -1 : 1;
+}
+
+fs.listAll(dir, { sort: compare }, function (err, files) {
+	console.log(err);   // possible exception
+	console.log(files); // sorted array of files
+});
 ```
 
 ### fs.listAllSync(dir, [options]);
@@ -314,7 +348,7 @@ Synchronous `fs.listAll()`;
 
 ### fs.listFiles(dir, [options], callback);
 
-List all files inside a directory. Supports filtering and recursive listing.
+List all files inside a directory.
 
 - **dir** `String` Path to a directory.
 - **[options]** `Object` Object with options:
@@ -322,17 +356,42 @@ List all files inside a directory. Supports filtering and recursive listing.
 	- *prependDir* `Boolean` Prepend `dir` path before every item in final array. Defaults to `false`.
 	- *filter* `Function` Function to filter items. Should return `true` or `false`. Receives arguments:
 		- *filePath* `String` Full path to a file.
-		- *stat* `Object` File's [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) object.
-	- *map* `Function` Function to map final list items. Receives arguments:
+		- *stat* [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) Object with data about a file.
+	- *map* `Function` Function to map final list items. Mapping is applied after *filter*. Receives arguments:
 		- *filePath* `String` Full path to a file.
-		- *stat* `Object` File's [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) object.
+		- *stat* [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) Object with data about a file.
+	- *sort* `Boolean | Function` Pass `true` to sort files
+		[lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order), or a compare function you'd normally
+		pass to an `Array.sort()`. Sorting is applied after *filter* & *map*. Function accepts two file paths (or
+		whatever *map* returned) for comparison.
 - **callback** `Function` Receives arguments:
 	- *err* `Mixed` Error object on error, `null` otherwise.
 	- *files* `Array` List of files inside a directory.
 
 ##### Examples
 
-See `fs.listAll()` examples.
+List all files in a directory recursively, and sort them by size:
+
+```js
+function map(filePath, stat) {
+	return {
+		path: filePath,
+		size: stat.size,
+	};
+}
+
+function compare(a, b) {
+	return a.size < b.size ? -1 : 1;
+}
+
+fs.listAll(dir, { map: map, sort: compare }, function (err, files) {
+	console.log(err);   // possible exception
+	console.log(files); // array of file object descriptors returned by map()
+	// Example
+	files[0].path; // 1st file's path
+	files[0].size; // 1st file's size
+});
+```
 
 ### fs.listFilesSync(dir, [options]);
 
@@ -340,7 +399,7 @@ Synchronous `fs.listFiles()`;
 
 ### fs.listDirs(dir, [options], callback);
 
-List all directories inside a directory. Supports filtering and recursive listing.
+List all directories inside a directory.
 
 - **dir** `String` Path to a directory.
 - **[options]** `Object` Object with options:
@@ -348,17 +407,42 @@ List all directories inside a directory. Supports filtering and recursive listin
 	- *prependDir* `Boolean` Prepend `dir` path before every directory in final array. Defaults to `false`.
 	- *filter* `Function` Function to filter items. Function should return `true` or `false`. Receives arguments:
 		- *dirPath* `String` Full path to a directory.
-		- *stat* `Object` Directory's [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) object.
-	- *map* `Function` Function to map final list items. Receives arguments:
+		- *stat* [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) Object with data about a directory.
+	- *map* `Function` Function to map final list items. Mapping is applied after *filter*. Receives arguments:
 		- *dirPath* `String` Full path to a directory.
-		- *stat* `Object` Directory's [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) object.
+		- *stat* [`fs.Stats`](http://nodejs.org/api/fs.html#fs_class_fs_stats) Object with data about a directory.
+	- *sort* `Boolean | Function` Pass `true` to sort directories
+		[lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order), or a compare function you'd normally
+		pass to an `Array.sort()`. Sorting is applied after *filter* & *map*. Function accepts two directory paths (or
+		whatever *map* returned) for comparison.
 - **callback** `Function` Receives arguments:
 	- *err* `Mixed` Error object on error, `null` otherwise.
 	- *dirs* `Array` List of directories inside a directory.
 
 ##### Examples
 
-See `fs.listAll()` examples.
+List all directories in a directory recursively, and sort them by modification time:
+
+```js
+function map(dirPath, stat) {
+	return {
+		path: dirPath,
+		mtime: stat.mtime,
+	};
+}
+
+function compare(a, b) {
+	return a.mtime < b.mtime ? -1 : 1;
+}
+
+fs.listAll(dir, { map: map, sort: compare }, function (err, files) {
+	console.log(err);   // possible exception
+	console.log(files); // array of file object descriptors returned by map()
+	// Example
+	files[0].path;  // 1st directory's path
+	files[0].mtime; // 1st directory's mtime
+});
+```
 
 ### fs.listDirsSync(dir, [options]);
 
