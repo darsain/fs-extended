@@ -1163,7 +1163,9 @@ function listAll(dir, options, callback, baseDir) {
 
 	function next() {
 		if (i >= files.length) {
-			return callback(null, list);
+			return callback(null, options.sort ?
+				list.sort(typeof options.sort === 'function' ? options.sort : undefined) :
+				list);
 		}
 		file = files[i++];
 		filePath = path.join(dir, file);
@@ -1234,7 +1236,7 @@ function listAllSync(dir, options, baseDir) {
 			list = list.concat(listAllSync(filePath, options, baseDir || dir));
 		}
 	}
-	return list;
+	return options.sort ? list.sort(typeof options.sort === 'function' ? options.sort : undefined) : list;
 }
 
 /**
