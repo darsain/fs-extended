@@ -1347,6 +1347,179 @@ fs.listDirsSync = function (dir, options) {
 };
 
 /**
+ * Asynchronous walker core.
+ *
+ * @param  {String}   retriever
+ * @param  {String}   dir
+ * @param  {Object}   options
+ * @param  {Function} callback
+ *
+ * @return {Void}
+ */
+function walk(retriever, dir, options, callback) {
+	if (typeof options === 'function') {
+		callback = options;
+		options = false;
+	}
+	var files, aborted, i;
+
+	retriever(dir, options, start);
+
+	function start(err, fls) {
+		if (err) {
+			return callback(err);
+		}
+		files = fls;
+		if (callback.length > 2) {
+			for (var t = 0, threads = Math.max(0|options.threads, 1); t < threads; t++) {
+				next();
+			}
+		} else {
+			for (var i = 0, l = files.length; i < l; i++) {
+				callback(null, files[i]);
+			}
+		}
+	}
+
+	function next() {
+		if (aborted || i >= files.length) {
+			return;
+		}
+		callback(null, files[i++], next, abort);
+	}
+
+	function abort() {
+		aborted = 1;
+	}
+}
+
+/**
+ * Synchronous walker core.
+ *
+ * @param  {String}   retriever
+ * @param  {String}   dir
+ * @param  {Object}   options
+ * @param  {Function} callback
+ *
+ * @return {Void}
+ */
+function walkSync(retriever, dir, options, callback) {
+	if (typeof options === 'function') {
+		callback = options;
+		options = false;
+	}
+	var aborted;
+	var files = retriever(dir, options);
+
+	for (var f = 0, fl = files.length; f < fl; f++) {
+		if (aborted) {
+			break;
+		}
+		callback(files[f], abort);
+	}
+
+	function abort() {
+		aborted = 1;
+	}
+}
+
+/**
+ * Walk through files and directories inside a directory.
+ *
+ * @param  {String}   dir
+ * @param  {Object}   [options]
+ * @param  {Function} callback
+ *
+ * @return {Void}
+ */
+fs.walkAll = function (dir, options, callback) {
+	walk(fs.listAll, dir, options, callback);
+};
+
+/**
+ * Synchronous fs.walkAll().
+ *
+ * @param  {String}   dir
+ * @param  {Object}   [options]
+ * @param  {Function} callback
+ *
+ * @return {Void}
+ */
+fs.walkAllSync = function (dir, options, callback) {
+	walkSync(fs.listAllSync, dir, options, callback);
+};
+
+/**
+ * Walk through files inside a directory.
+ *
+ * @param  {String}   dir
+ * @param  {Object}   [options]
+ * @param  {Function} callback
+ *
+ * @return {Void}
+ */
+fs.walkFiles = function (dir, options, callback) {
+	walk(fs.listFiles, dir, options, callback);
+};
+
+/**
+ * Synchronous fs.walkFiles().
+ *
+ * @param  {String}   dir
+ * @param  {Object}   [options]
+ * @param  {Function} callback
+ *
+ * @return {Void}
+ */
+fs.walkFilesSync = function (dir, options, callback) {
+	walkSync(fs.listFilesSync, dir, options, callback);
+};
+
+/**
+ * Walk through directories inside a directory.
+ *
+ * @param  {String}   dir
+ * @param  {Object}   [options]
+ * @param  {Function} callback
+ *
+ * @return {Void}
+ */
+fs.walkDirs = function (dir, options, callback) {
+	walk(fs.listDirs, dir, options, callback);
+};
+
+/**
+ * Synchronous fs.walkDirs().
+ *
+ * @param  {String}   dir
+ * @param  {Object}   [options]
+ * @param  {Function} callback
+ *
+ * @return {Void}
+ */
+fs.walkDirsSync = function (dir, options, callback) {
+	walkSync(fs.listDirsSync, dir, options, callback);
+};
+
+/**
+ * Synchronous fs.walkDir().
+ *
+ * @param  {String} dir
+ * @param  {Object} [options]
+ *
+ * @return {Array} List of directories in dir.
+ */
+fs.listDirsSync = function (dir, options) {
+	options = options || {};
+
+	function filter(filePath, stat) {
+		return !stat.isFile() && (!options.filter || options.filter(filePath, stat));
+	}
+
+	return listAllSync(dir, extend({}, options, { filter: filter }));
+};
+
+/**
  * Generates a unique path that won't override any other file.
  *
  * If path doesn't exist, it is simply returned. Otherwise it will try appending "-N"
