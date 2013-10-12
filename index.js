@@ -1361,7 +1361,7 @@ function walk(retriever, dir, options, callback) {
 		callback = options;
 		options = false;
 	}
-	var files, aborted, i;
+	var files, aborted, i, total;
 
 	retriever(dir, options, start);
 
@@ -1370,19 +1370,21 @@ function walk(retriever, dir, options, callback) {
 			return callback(err);
 		}
 		files = fls;
+		total = fls.length;
 		if (callback.length > 2) {
+			i = 0;
 			for (var t = 0, threads = Math.max(0|options.threads, 1); t < threads; t++) {
 				next();
 			}
 		} else {
-			for (var i = 0, l = files.length; i < l; i++) {
-				callback(null, files[i]);
+			for (var f = 0; f < total; f++) {
+				callback(null, files[f]);
 			}
 		}
 	}
 
 	function next() {
-		if (aborted || i >= files.length) {
+		if (aborted || i >= total) {
 			return;
 		}
 		callback(null, files[i++], next, abort);
