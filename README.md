@@ -1,9 +1,6 @@
 # fs-extended [![Build Status](https://secure.travis-ci.org/Darsain/fs-extended.png?branch=master)](http://travis-ci.org/Darsain/fs-extended) [![NPM version](https://badge.fury.io/js/fs-extended.png)](https://npmjs.org/package/fs-extended)
 
-Node.js module that extends the native `fs` with a lot of convenient methods.
-
-If you miss a method, and there is more than 1 person in the world that would use it,
-[create an issue](https://github.com/Darsain/fs-extended/issues)!.
+Node.js module that extends the native `fs` with convenient methods.
 
 #### Dependencies
 
@@ -528,7 +525,7 @@ Alias: `fs.writeJsonSync()`
 
 ### fs.readJSON(file, callback);
 
-Encode data in JSON format and write into a file. Creates destination directory if it doesn't exist yet.
+Read data from JSON file.
 
 - **file** `String` Path to a JSON file.
 - **callback** `Function` Receives arguments:
