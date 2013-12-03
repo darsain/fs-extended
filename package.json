@@ -2,7 +2,7 @@
 	"name": "fs-extended",
 	"description": "Extends native fs module with a lot of convenient methods.",
 	"version": "0.2.0",
-	"homepage": "https://github.com/Darsain/fs-extended",
+	"homepage": "https://github.com/darsain/fs-extended",
 	"author": {
 		"name": "Darsain",
 		"url": "http://darsa.in"
@@ -15,10 +15,10 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/Darsain/fs-extended.git"
+		"url": "git://github.com/darsain/fs-extended.git"
 	},
 	"bugs": {
-		"url": "https://github.com/Darsain/fs-extended/issues"
+		"url": "https://github.com/darsain/fs-extended/issues"
 	},
 	"licenses": [
 		{

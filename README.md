@@ -1,4 +1,4 @@
-# fs-extended [![Build Status](https://secure.travis-ci.org/Darsain/fs-extended.png?branch=master)](http://travis-ci.org/Darsain/fs-extended) [![NPM version](https://badge.fury.io/js/fs-extended.png)](https://npmjs.org/package/fs-extended)
+# fs-extended [![Build Status](https://secure.travis-ci.org/darsain/fs-extended.png?branch=master)](http://travis-ci.org/darsain/fs-extended) [![NPM version](https://badge.fury.io/js/fs-extended.png)](https://npmjs.org/package/fs-extended)
 
 Node.js module that extends the native `fs` with convenient methods.
 
@@ -6,7 +6,7 @@ Node.js module that extends the native `fs` with convenient methods.
 
 None.
 
-### [Changelog](https://github.com/Darsain/fs-extended/wiki/Changelog)
+### [Changelog](https://github.com/darsain/fs-extended/wiki/Changelog)
 
 Upholds the [Semantic Versioning Specification](http://semver.org/).
 
