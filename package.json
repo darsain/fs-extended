@@ -1,7 +1,7 @@
 {
 	"name": "fs-extended",
 	"description": "Extends native fs module with a lot of convenient methods.",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"homepage": "https://github.com/darsain/fs-extended",
 	"author": {
 		"name": "Darsain",

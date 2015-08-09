@@ -1,5 +1,7 @@
 # fs-extended [![Build Status](https://secure.travis-ci.org/darsain/fs-extended.png?branch=master)](http://travis-ci.org/darsain/fs-extended) [![NPM version](https://badge.fury.io/js/fs-extended.png)](https://npmjs.org/package/fs-extended)
 
+**THIS MODULE IS DEPRECATED! USE [fs-extra](https://www.npmjs.com/package/fs-extra) INSTEAD.**
+
 Node.js module that extends the native `fs` with convenient methods.
 
 #### Dependencies
